@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = MongoClient(os.getenv("MONGO_URI"))
+client = MongoClient(os.getenv("PY_MONGO_URI"))
 db = client["api_monitor"]
 health_checks = db["health_checks"]
 incidents = db["incidents"]
@@ -301,7 +301,7 @@ def create_ttl_index():
     )
     print("TTL index created: auto-delete after 7 days")
 
-    
+
 # 15. Run explain on a query to see performance
 def explain_query():
     print("=== WITHOUT INDEX (if not created yet) or WITH INDEX ===")
