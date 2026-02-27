@@ -220,7 +220,9 @@ def active_incidents():
     for doc in results:
         print(doc)
 
-
+    """
+    SELECT * FROM incidents WHERE status = 'active'
+    """
 # 11. Average incident duration for resolved incidents
 def avg_incident_duration():
     pipeline = [
@@ -246,6 +248,13 @@ def avg_incident_duration():
     else:
         print("No resolved incidents found.")
 
+    """
+    SELECT service,
+           AVG(TIMESTAMPDIFF(MINUTE, started_at, resolved_at)) AS avg_duration_min
+    FROM incidents
+    WHERE status = 'resolved' AND resolved_at IS NOT NULL
+    GROUP BY service;
+    """
 
 # 12. Service with the most incidents
 def most_incidents():
@@ -263,7 +272,15 @@ def most_incidents():
     else:
         print("No incidents found.")
 
-
+    """
+    SELECT 
+        service,
+        COUNT(*) as incident_count
+    FROM incidents
+    GROUP BY service
+    ORDER BY incident_count DESC
+    LIMIT 1
+    """
 # indexing and performance
 
 # 13. Create compound index on service + timestamp
@@ -284,7 +301,7 @@ def create_ttl_index():
     )
     print("TTL index created: auto-delete after 7 days")
 
-
+    
 # 15. Run explain on a query to see performance
 def explain_query():
     print("=== WITHOUT INDEX (if not created yet) or WITH INDEX ===")
