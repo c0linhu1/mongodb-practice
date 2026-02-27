@@ -90,15 +90,15 @@ def uptime_percentage():
     pipeline = [
         {"$group": {
             "_id": "$service",
-            "total": {"$sum": 1},
+            "total": {"$sum": 1}, # adds one for every docuemnt
             "healthy": {
-                "$sum": {"$cond": ["$is_healthy", 1, 0]}
+                "$sum": {"$cond": ["$is_healthy", 1, 0]} # if the document is healthy then add 1 else add 0
             }
         }},
-        {"$project": {
+        {"$project": { # calculates percentage 
             "service": "$_id",
             "uptime_pct": {
-                "$round": [
+                "$round": [ # self explanatory
                     {"$multiply": [
                         {"$divide": ["$healthy", "$total"]},
                         100
@@ -112,7 +112,14 @@ def uptime_percentage():
     ]
     for doc in health_checks.aggregate(pipeline):
         print(f"{doc['service']}: {doc['uptime_pct']}% uptime ({doc['healthy_checks']}/{doc['total_checks']})")
-
+    """
+    SELECT service,
+           COUNT(*) AS total_checks,
+           SUM(CASE WHEN is_healthy = true THEN 1 ELSE 0 END) AS healthy_checks,
+           ROUND(SUM(CASE WHEN is_healthy = true THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS uptime_pct
+    FROM health_checks
+    GROUP BY service;
+    """
 
 # 7. Slowest response time per service
 def slowest_response():
@@ -126,6 +133,14 @@ def slowest_response():
     for doc in health_checks.aggregate(pipeline):
         print(f"{doc['_id']}: {doc['max_response_ms']}ms slowest")
 
+    """
+    SELECT
+        service,
+        MAX(response_time_ms)
+    FROM health_checks
+    GROUP BY service
+    ORDER BY max(response...) DESC
+    """
 
 # 8. Group checks by hour to see performance trends
 def hourly_trends():
@@ -148,6 +163,17 @@ def hourly_trends():
               f"avg {round(doc['avg_response_ms'], 2)}ms, "
               f"{doc['failures']} failures out of {doc['total_checks']} checks")
 
+    """
+    SELECT 
+        service,
+        EXTRACT(HOUR FROM timestamp) as hour,
+        AVG(avg_response_ms),
+        COUNT(*) as total_checks,
+        SUM(CASE WHEN is_healthy = true THEN 0 ELSE 1 END) as failures
+    FROM health_checks
+    GROUP BY service, EXTRACT(HOUR from timestamp)
+    ORDER BY hour ASC
+    """
 
 # 9. Find time windows where BOTH services were down
 def simultaneous_downtime():
@@ -175,6 +201,16 @@ def simultaneous_downtime():
     else:
         print("No simultaneous downtime found.")
 
+    """
+    SELECT DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i') AS minute,
+           GROUP_CONCAT(DISTINCT service) AS services_down,
+           COUNT(*) AS count
+    FROM health_checks
+    WHERE is_healthy = false
+    GROUP BY DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i')
+    HAVING COUNT(*) >= 2
+    ORDER BY minute DESC;
+    """
 
 # incident queries
 
