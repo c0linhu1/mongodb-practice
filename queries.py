@@ -62,24 +62,29 @@ def count_checks_per_service():
     SELECT service, COUNT(*) as checks FROM health_checks GROUP BY service
     """
 
-    
+
 # aggregation pipelines
 
 # 5. Average response time per service (last hour)
 def avg_response_time():
     one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
     pipeline = [
+        # $match - only keeps documents that fufill requirement
         {"$match": {"timestamp": {"$gte": one_hour_ago}}},
+        # the attributes? idk need to have $ in front of them when grouping
         {"$group": {
-            "_id": "$service",
+            "_id": "$service",  # this is like primary key
             "avg_response_ms": {"$avg": "$response_time_ms"}
         }},
-        {"$sort": {"avg_response_ms": -1}}
+        {"$sort": {"avg_response_ms": -1}} # sorting descending order
     ]
     for doc in health_checks.aggregate(pipeline):
         print(f"{doc['_id']}: {round(doc['avg_response_ms'], 2)}ms avg")
 
-
+    """
+    SELECT service, AVG(response_time_ms) FROM health_checks WHERE timestamp >= NOW() - INTERVAL 1 HOUR GROUP BY service 
+    ORDER BY AVG(response_time_ms) DESC 
+    """
 # 6. Uptime percentage per service
 def uptime_percentage():
     pipeline = [
