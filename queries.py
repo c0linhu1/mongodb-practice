@@ -59,8 +59,10 @@ def count_checks_per_service():
         print(f"{service}: {count} checks")
 
     """
-    
+    SELECT service, COUNT(*) as checks FROM health_checks GROUP BY service
     """
+
+    
 # aggregation pipelines
 
 # 5. Average response time per service (last hour)
