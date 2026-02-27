@@ -46,13 +46,6 @@ Also messed with node.js
 }
 ```
 
-## Setup
-
-### Prerequisites
-- Python 3.8+
-- MongoDB Atlas account (free tier)
-
-
 ## Queries Covered
 
 ### Basic Queries
