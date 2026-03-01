@@ -1,6 +1,6 @@
 # API Health Monitoring System
 
-MONGODB ATLAS PRACTICE - USING PYMONGO AND NODEJS TO QUERY DATABASE - speedrun complete
+MONGODB ATLAS PRACTICE - USING PYMONGO AND NODEJS TO QUERY DATABASE 
 
 API health monitoring system using Python and MongoDB Atlas that tracks endpoint availability, detects service degradation through automated incident detection, and analyzes uptime metrics via aggregation pipelines. Trying to get full experience with querying and collection/document initialization in mongodb atlas.
 
